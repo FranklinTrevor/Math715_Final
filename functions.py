@@ -1,6 +1,18 @@
 '''
 Functions for Math715 Final Project
 '''
+
+'''
+General Input Parameters
+P = Polynomial Order of the Lagrange Basis Functions
+roots = Locations of the GLL points on reference element
+weights = Associated Weights of the GLL points
+dh = width of an element
+ne = number of elements
+u_l, u_r = left and right dirichlet condition
+'''
+
+#-------------------------------------------------------------------#
 #Imports
 import numpy as np
 from numpy.polynomial.legendre import Legendre
@@ -8,6 +20,8 @@ from scipy.special import roots_legendre, eval_legendre
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+#-------------------------------------------------------------------#
+#SEM Internals (Basis functions, Mass, Stiffness, Global Sum)
 def gll_points_weights(P):
     N = P + 1
     if P == 1:
@@ -100,29 +114,6 @@ def Global_Sum(P, M, ne, free_nodes):
 
     return M_full, M_reduced
 
-
-def Mesh_1D_DD(ne, L, roots):
-    P = len(roots) - 1
-    dx = L / ne
-    elements = np.array([[i*dx, (i+1)*dx] for i in range(ne)])
-
-    nodes_total = []
-    for e in range(ne):
-        xL, xR = elements[e]
-        x_e = 0.5*(roots + 1.0)*dx + xL
-
-        if e == 0:
-            nodes_total.extend(x_e)
-        else:
-            nodes_total.extend(x_e[1:])
-
-    nodes_total = np.array(nodes_total)
-
-    ndof = ne * P + 1
-    free_nodes = np.arange(1, ndof - 1)
-
-    return dx, np.linspace(0, L, ne+1), elements, nodes_total, free_nodes
-
 def load_vec(K_global,u_l,u_r):
     K_l = K_global[1:-1,0]
     K_r = K_global[1:-1,-1]
@@ -146,6 +137,34 @@ def Mass_Matrix(P,weights,dh):
                 M[j,i] = 0
 
     return M
+
+#-------------------------------------------------------------------#
+#Creating the 1D Mesh
+
+def Mesh_1D_DD(ne, L, roots):
+    P = len(roots) - 1
+    dx = L / ne
+    elements = np.array([[i*dx, (i+1)*dx] for i in range(ne)])
+
+    nodes_total = []
+    for e in range(ne):
+        xL, xR = elements[e]
+        x_e = 0.5*(roots + 1.0)*dx + xL
+
+        if e == 0:
+            nodes_total.extend(x_e)
+        else:
+            nodes_total.extend(x_e[1:])
+
+    nodes_total = np.array(nodes_total)
+
+    ndof = ne * P + 1
+    free_nodes = np.arange(1, ndof - 1)
+
+    return dx, np.linspace(0, L, ne+1), elements, nodes_total, free_nodes
+
+#-------------------------------------------------------------------#
+#Plotting the solution
 
 def animate_solution(u, x, u_exact, x_exact, dt=1.0, fps=60, speed=1.0):
     nt, nx = u.shape
