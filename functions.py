@@ -97,8 +97,8 @@ def Mesh_1D_DD(ne,L,roots):
 
     elements = np.zeros((ne,2))
     for i in range(ne):
-        elements[i,0] = i+1
-        elements[i,1] = i+2
+        elements[i,0] = x[i]
+        elements[i,1] = x[i+1]
 
     nodes_total = []
     for i in range(ne):
