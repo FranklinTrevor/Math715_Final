@@ -71,3 +71,49 @@ def Stiffness_Matrix(P,D,weights,dh):
                 k_sum = k_sum + weights[k]*D[j,k]*D[i,k]*(2/dh)**2*(dh/2)
             K[j,i] = k_sum
     return K
+
+def Global_Sum(P,M,ne,free_nodes):
+    N = P + 1
+    fn_len = len(free_nodes)
+    M_global = np.zeros((fn_len, fn_len))
+
+    free_map = {g: i for i, g in enumerate(free_nodes)}
+
+    for e in range(ne):
+        for a in range(N):
+            A = e * (N - 1) + a
+            if A not in free_map:    
+                continue
+            I = free_map[A]           
+
+            for b in range(N):
+                B = e * (N - 1) + b
+                if B not in free_map: 
+                    continue
+                J = free_map[B]   
+
+                M_global[I, J] += M[a, b]
+    return M_global
+
+def Mesh_1D_DD(ne,L,roots):
+    dx = (L-0)/ne 
+    x = np.linspace(0,L,ne+1)
+
+    elements = np.zeros((ne,2))
+    for i in range(ne):
+        elements[i,0] = i+1
+        elements[i,1] = i+2
+
+    nodes_total = []
+    for i in range(ne):
+        for item in roots:
+            x_root = (item+1)/2*dx + elements[i][0]
+            nodes_total.append(x_root)
+
+    nodes_total = np.unique(nodes_total)
+
+    N = len(roots)
+    ndof = ne * (N - 1) + 1
+    free_nodes = np.arange(1, ndof - 1)
+
+    return dx, x, elements, nodes_total, free_nodes
