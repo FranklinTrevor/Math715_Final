@@ -38,3 +38,24 @@ def Lagrange_basis_functions(P):
         bf_vec[j,:] = prod
 
     return zeta_gll, w_gll, zeta, bf_vec
+
+def Lagrange_Derivative_Matrix(P,roots):
+    N = P+1
+    D = np.zeros((N,N))
+
+    for j in range(N):
+        for i in range(N):
+            D_sum = 0
+            D_mult = 1
+            if j == i:
+                for k in range(N):
+                    if k != j:
+                        D_sum = D_sum + 1/(roots[j]-roots[k])
+                D[j,i] = D_sum
+            else:
+                for k in range(N):
+                    if k !=i and k != j:
+                        D_mult = D_mult*(roots[i]-roots[k])/(roots[j]-roots[k])
+                D[j,i] = 1/(roots[j]-roots[i])*D_mult
+
+    return D
