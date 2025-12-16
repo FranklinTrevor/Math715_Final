@@ -59,3 +59,15 @@ def Lagrange_Derivative_Matrix(P,roots):
                 D[j,i] = 1/(roots[j]-roots[i])*D_mult
 
     return D
+
+def Stiffness_Matrix(P,D,weights,dh):
+    N = P + 1
+    K = np.zeros((N,N))
+
+    for j in range(N):
+        for i in range(N):
+            k_sum = 0
+            for k in range(N):
+                k_sum = k_sum + weights[k]*D[j,k]*D[i,k]*(2/dh)**2*(dh/2)
+            K[j,i] = k_sum
+    return K
